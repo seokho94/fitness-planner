@@ -259,12 +259,13 @@ flowchart TD
 | `disabled` | `boolean` | `false` | 비활성 |
 | `error` | `string` | — | 오류 문구. 있으면 오류 상태 |
 | `allowEmpty` | `boolean` | `false` | 빈 칸(`null`) 허용 여부. 선택 입력 항목(RPE, 체지방률 등)은 `true` |
+| `clamp` | `boolean` | `true` | 직접 입력 값을 `min`~`max`로 자를지 여부. `false`면 자르지 않고 오류 상태로 둔다(체성분 입력, F-BM 명세 2.2절) |
 
 **출력(이벤트)**
 
 | 이벤트 | 시점 | 값 |
 | --- | --- | --- |
-| `onChange(value: number \| null)` | `-`/`+` 탭 즉시, 직접 입력은 blur 또는 Enter 시 | `min`~`max`로 자르고 `precision`으로 반올림한 값 |
+| `onChange(value: number \| null)` | `-`/`+` 탭 즉시, 직접 입력은 blur 또는 Enter 시 | `min`~`max`로 자르고(`clamp=true`일 때) `precision`으로 반올림한 값 |
 
 **상태**
 
@@ -285,7 +286,7 @@ flowchart TD
 | RPE | 0.5 | 6 | 10 | 1 | — |
 | 목표 세트 수 | 1 | 1 | 20 | 0 | 세트 |
 | 체중 | 0.1 | 20 | 300 | 1 | kg |
-| 체지방률 | 0.1 | 1 | 70 | 1 | % |
+| 체지방률 | 0.1 | 1 | 75 | 1 | % |
 | 골격근량 | 0.1 | 5 | 100 | 1 | kg |
 | 휴식 시간 | 15초 | 0 | 600초 | 0 | mm:ss로 표시(5.3절) |
 
