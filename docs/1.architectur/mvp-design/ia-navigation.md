@@ -81,7 +81,7 @@ S-01~S-16 전체 화면의 경로다. 경로 파라미터는 모두 UUID 문자�
 | S-02 | 운동 라이브러리 (둘러보기) | `/exercises` | 루틴 | 표시 | `?q=`(검색어), `?muscle=CHEST,BACK`, `?equipment=BARBELL` | 필터 상태는 URL에 둔다(2.5절) |
 | S-02 | 운동 라이브러리 (선택 모드, 세션) | `/workout/exercises` | 홈 | 숨김 | 진행 중 세션이 있어야 함 | S-08의 **자식 라우트**. 부모 화면을 유지한 채 전체 화면으로 덮는다 |
 | S-02 | 운동 라이브러리 (선택 모드, 루틴) | `/routines/new/exercises`, `/routines/:routineId/edit/exercises` | 루틴 | 숨김 | — | S-06의 **자식 라우트**. 편집 중인 폼 상태가 유지된다 |
-| S-03 | 운동 상세 | `/exercises/:exerciseId` | 루틴 | 표시 | — | 삭제된 사용자 정의 운동도 과거 기록 링크로 열 수 있다(읽기 전용) |
+| S-03 | 운동 상세 | `/exercises/:exerciseId` | 루틴 | 표시 | `?metric=`(추이 지표 탭, 기록 유형별 값), `?range=4w\|12w\|1y\|all`(기본 `12w`) | 삭제된 사용자 정의 운동도 과거 기록 링크로 열 수 있다(읽기 전용). 지표 값은 F-ST 명세 4.2절 |
 | S-04 | 운동 추가·편집 | `/exercises/new`, `/exercises/:exerciseId/edit` | 루틴 | 숨김 | 편집은 `isCustom=true`인 운동만 | 기본 운동으로 `/edit` 진입 시 S-03으로 대체 이동 |
 | S-05 | 루틴 목록 | `/routines` | 루틴 | 표시 | — | 탭 루트 |
 | S-06 | 루틴 편집 | `/routines/new`, `/routines/:routineId/edit` | 루틴 | 숨김 | `?copyFrom=:routineId`(복제 시 원본) | 생성·편집 겸용 |
@@ -91,7 +91,7 @@ S-01~S-16 전체 화면의 경로다. 경로 파라미터는 모두 UUID 문자�
 | S-10 | 세션 요약 | `/workout/summary/:sessionId` | 홈 | 숨김 | `COMPLETED` 세션만. 아니면 `/history`로 대체 이동 | S-08에서 세션 종료 시 **replace**로 진입(뒤로 가기로 S-08에 돌아가지 않음) |
 | S-11 | 히스토리 | `/history` | 히스토리 | 표시 | `?view=list\|calendar`(기본 `list`), `?month=2026-10`(캘린더 표시 월) | 탭 루트 |
 | S-12 | 세션 상세 | `/history/sessions/:sessionId` | 히스토리 | 표시 | — | 삭제된 세션이면 `/history`로 대체 이동 |
-| S-13 | 통계 | `/history/stats` | 히스토리 | 표시 | `?range=4w\|12w\|1y\|all`(기본 `12w`) | |
+| S-13 | 통계 | `/history/stats` | 히스토리 | 표시 | `?range=4w\|12w\|1y\|all`(기본 `12w`), `?exercise=`(1RM 카드 선택 운동 id) | |
 | S-14 | 체성분 | `/body` | 체성분 | 표시 | `?range=1m\|3m\|1y\|all`(기본 `3m`) | 탭 루트 |
 | S-15 | 체성분 입력 | `/body/new`, `/body/:measurementId/edit` | 체성분 | 숨김 | `?from=home`(홈에서 진입 시 저장 후 홈으로 복귀) | |
 | S-16 | 설정·데이터 관리 | `/settings` | 설정 | 표시 | — | 내보내기·가져오기, 휴식 타이머 기본값(사전조사 2.2절) |
@@ -390,6 +390,7 @@ flowchart TD
 | --- | --- | --- | --- |
 | S-01 오늘 루틴 | empty | 오늘 배정된 루틴이 없어요 | 주간 계획 보기 |
 | S-02 | no-results | 조건에 맞는 운동이 없어요 | 필터 초기화 |
+| S-03 기록 | empty | 아직 이 운동 기록이 없어요 | — |
 | S-05 | empty | 아직 루틴이 없어요 | 루틴 만들기 |
 | S-11 | empty | 아직 운동 기록이 없어요 | 운동 시작 |
 | S-13 | empty | 통계를 낼 기록이 부족해요 | — |
