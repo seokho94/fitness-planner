@@ -4,11 +4,14 @@
 - 작성일: 2026-10-01
 - 기준 시점: **2026-10** (이 시점의 국내 헬스장 운동 구성 기준)
 - 상태: 초안
+- 개정 이력
+  - 2026-10-01 (FP-25): I-01 — `BAND` 운동 3개(139~141번) 추가, 1장 요약에 장비별 개수 표와 합계 추가 / I-03 — 6장 기본 운동 `createdAt`·`updatedAt`을 시드 작성 시각 고정값으로 변경 / I-12 — 4.1절에 #0 `SETTINGS_ID` 예약 명시
 - 기준 문서
   - [사전조사 종합 요약 및 의사결정](../pre-research-summary.md) ADR-006(자체 큐레이션), R-3(라이선스), Q-4(이미지), C-4(시드 범위)
   - [데이터 모델·도메인 규칙 v1](./data-model-v1.md) 1.4절(열거값), 2.1절(Exercise), 4장(기록 유형)
+  - [운동 라이브러리(F-EX) 상세 기능 명세](../../2.feature/mvp-spec/exercise-library.md) 3.3절(시드 규칙)
 
-이 문서는 앱 첫 실행 시 넣는 **기본 운동(`isCustom=false`) 138개**의 목록과 분류 기준을 확정한다.
+이 문서는 앱 첫 실행 시 넣는 **기본 운동(`isCustom=false`) 141개**의 목록과 분류 기준을 확정한다.
 작성은 웹 조회 없이 기존 지식으로 했으며, 외부 데이터셋을 복사하지 않았다(7장).
 
 ---
@@ -17,23 +20,34 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 전체 운동 수 | 138 |
-| 기록 유형 | `WEIGHT_REPS` 95, `REPS_ONLY` 26, `DURATION` 17 |
+| 전체 운동 수 | 141 |
+| 기록 유형 | `WEIGHT_REPS` 95, `REPS_ONLY` 29, `DURATION` 17 (합계 141) |
 | 유산소(`CARDIO`) | 11개, 모두 `DURATION` |
 | 등척성 운동 | 데드 행, 월 싯, 플랭크, 사이드 플랭크, 할로우 바디 홀드 (모두 `DURATION`) |
 | 이미지 | 넣지 않는다(Q-4 기본안) |
 
-주 부위별 개수
+주 부위별 개수 (13개 부위 모두 2개 이상)
 
 | 주 부위 | 개수 | 주 부위 | 개수 |
 | --- | --- | --- | --- |
 | `CHEST` | 17 | `QUADRICEPS` | 16 |
 | `BACK` | 18 | `HAMSTRINGS` | 6 |
-| `SHOULDERS` | 15 | `GLUTES` | 9 |
-| `BICEPS` | 9 | `CALVES` | 4 |
+| `SHOULDERS` | 16 | `GLUTES` | 10 |
+| `BICEPS` | 10 | `CALVES` | 4 |
 | `TRICEPS` | 9 | `ABS` | 15 |
 | `FOREARMS` | 3 | `FULL_BODY` | 6 |
 | | | `CARDIO` | 11 |
+| | | **합계** | **141** |
+
+장비별 개수 (8개 장비 모두 1개 이상)
+
+| 장비 | 개수 | 장비 | 개수 |
+| --- | --- | --- | --- |
+| `BARBELL` | 27 | `KETTLEBELL` | 2 |
+| `DUMBBELL` | 24 | `BODYWEIGHT` | 31 |
+| `MACHINE` | 36 | `BAND` | 3 |
+| `CABLE` | 13 | `OTHER` | 5 |
+| | | **합계** | **141** |
 
 ---
 
@@ -86,6 +100,7 @@
 - EZ바, 티바 로우(랜드마인), 랜드마인 프레스는 `BARBELL`이다.
 - 딥스·풀업 바, 매트, 벤치만 쓰는 운동과 야외 러닝은 `BODYWEIGHT`이다.
 - 가중 벨트를 쓰는 가중 딥스·가중 풀업, 앱 롤러, 배틀 로프, 줄넘기는 `OTHER`이다.
+- 저항 밴드(루프 밴드·튜빙 밴드)를 쓰는 운동은 `BAND`이다.
 
 ### 3.3 기록 유형(trackingType)
 
@@ -96,11 +111,12 @@
 | 1 | 유산소(`primaryMuscle = CARDIO`) | `DURATION` (장비와 관계없음. 거리는 기록하지 않는다, 데이터 모델 4.1절) |
 | 2 | 등척성 운동(자세를 버티는 운동) | `DURATION` |
 | 3 | 시간 단위로 하는 컨디셔닝(배틀 로프) | `DURATION` |
-| 4 | 맨몸 운동(외부 중량 없음) | `REPS_ONLY` |
+| 4 | 맨몸 운동(외부 중량 없음), 밴드 운동(kg 중량 없음) | `REPS_ONLY` |
 | 5 | 그 외(바벨·덤벨·머신·케이블·케틀벨, 가중 맨몸 운동) | `WEIGHT_REPS` |
 
 - 가중 딥스·가중 풀업은 맨몸 버전과 별도 운동으로 두고 `WEIGHT_REPS`로 기록한다. `weight`에는 추가 중량만 넣는다(데이터 모델 4.1절).
 - 앱 롤아웃은 도구(`OTHER`)를 쓰지만 외부 중량이 없으므로 `REPS_ONLY`다.
+- 밴드 운동은 저항을 kg으로 적을 수 없으므로 `REPS_ONLY`다. 밴드 강도는 세트·세션 메모에 적는다.
 
 ---
 
@@ -111,8 +127,9 @@
 - 기본 운동 `id`는 미리 정한 고정 UUID를 쓴다(데이터 모델 1.1절, C-2). 기기·설치마다 같은 값이어야 JSON 가져오기·병합과 확장 시 동기화에서 같은 운동으로 인식된다.
 - 형식: `0192a000-0000-7000-8000-{순번 12자리}`
   - UUID v7 형식(버전 `7`, variant `8`)을 지키는 소문자 문자열이다. 타임스탬프 부분은 실제 생성 시각이 아니라 고정값이다.
-  - 마지막 12자리는 표의 `#` 번호를 0으로 채운 값이다(예: 1번 → `000000000001`, 138번 → `000000000138`).
-- **한번 배포한 UUID는 바꾸거나 다른 운동에 다시 쓰지 않는다.** 운동을 빼야 하면 해당 번호를 비워 두고, 새 운동은 139번부터 붙인다.
+  - 마지막 12자리는 표의 `#` 번호를 0으로 채운 값이다(예: 1번 → `000000000001`, 141번 → `000000000141`).
+  - **#0(`0192a000-0000-7000-8000-000000000000`)은 Settings 고정 id(`SETTINGS_ID`, 데이터 모델 2.8절)로 예약한다.** 기본 운동 번호는 1부터 쓴다.
+- **한번 배포한 UUID는 바꾸거나 다른 운동에 다시 쓰지 않는다.** 운동을 빼야 하면 해당 번호를 비워 두고, 새 운동은 마지막 번호 다음(현재 142번)부터 붙인다.
 - 사용자 정의 운동은 Repository가 생성 시각 기반 UUID v7을 부여하므로 이 범위와 겹치지 않는다.
 
 ### 4.2 코드
@@ -126,6 +143,7 @@
 ## 5. 시드 표
 
 보조 부위가 없으면 `—`로 적는다(저장 값은 `[]`).
+139번 이후는 추가한 순서대로 번호를 붙이고(4.1절), 주 부위에 해당하는 표의 끝에 둔다.
 
 ### 5.1 가슴 (`CHEST`)
 
@@ -191,6 +209,7 @@
 | 48 | `0192a000-0000-7000-8000-000000000048` | `BARBELL_UPRIGHT_ROW` | 바벨 업라이트 로우 | Barbell Upright Row | `SHOULDERS` | `BACK`, `BICEPS` | `BARBELL` | `WEIGHT_REPS` |
 | 49 | `0192a000-0000-7000-8000-000000000049` | `LANDMINE_PRESS` | 랜드마인 프레스 | Landmine Press | `SHOULDERS` | `CHEST`, `TRICEPS` | `BARBELL` | `WEIGHT_REPS` |
 | 50 | `0192a000-0000-7000-8000-000000000050` | `PIKE_PUSH_UP` | 파이크 푸시업 | Pike Push-up | `SHOULDERS` | `TRICEPS` | `BODYWEIGHT` | `REPS_ONLY` |
+| 139 | `0192a000-0000-7000-8000-000000000139` | `BAND_PULL_APART` | 밴드 풀어파트 | Band Pull-apart | `SHOULDERS` | `BACK` | `BAND` | `REPS_ONLY` |
 
 ### 5.4 이두 (`BICEPS`)
 
@@ -205,6 +224,7 @@
 | 57 | `0192a000-0000-7000-8000-000000000057` | `EZ_BAR_PREACHER_CURL` | 이지바 프리처 컬 | EZ-Bar Preacher Curl | `BICEPS` | `FOREARMS` | `BARBELL` | `WEIGHT_REPS` |
 | 58 | `0192a000-0000-7000-8000-000000000058` | `MACHINE_BICEPS_CURL` | 바이셉스 컬 머신 | Machine Biceps Curl | `BICEPS` | — | `MACHINE` | `WEIGHT_REPS` |
 | 59 | `0192a000-0000-7000-8000-000000000059` | `CABLE_CURL` | 케이블 컬 | Cable Curl | `BICEPS` | `FOREARMS` | `CABLE` | `WEIGHT_REPS` |
+| 140 | `0192a000-0000-7000-8000-000000000140` | `BAND_CURL` | 밴드 컬 | Band Curl | `BICEPS` | `FOREARMS` | `BAND` | `REPS_ONLY` |
 
 ### 5.5 삼두 (`TRICEPS`)
 
@@ -273,6 +293,7 @@
 | 100 | `0192a000-0000-7000-8000-000000000100` | `DUMBBELL_SUMO_SQUAT` | 덤벨 와이드 스쿼트 | Dumbbell Sumo Squat | `GLUTES` | `QUADRICEPS` | `DUMBBELL` | `WEIGHT_REPS` |
 | 101 | `0192a000-0000-7000-8000-000000000101` | `KETTLEBELL_SWING` | 케틀벨 스윙 | Kettlebell Swing | `GLUTES` | `HAMSTRINGS`, `BACK`, `SHOULDERS` | `KETTLEBELL` | `WEIGHT_REPS` |
 | 102 | `0192a000-0000-7000-8000-000000000102` | `DONKEY_KICK` | 동키 킥 | Donkey Kick | `GLUTES` | `HAMSTRINGS` | `BODYWEIGHT` | `REPS_ONLY` |
+| 141 | `0192a000-0000-7000-8000-000000000141` | `BAND_LATERAL_WALK` | 밴드 래터럴 워크 | Band Lateral Walk | `GLUTES` | — | `BAND` | `REPS_ONLY` |
 
 ### 5.10 종아리 (`CALVES`)
 
@@ -351,15 +372,19 @@
 }
 ```
 
-- 앱 첫 실행 시 `isCustom=false`, `createdAt`·`updatedAt`=삽입 시각, `deletedAt=null`을 붙여 저장한다. `code`, `nameEn`은 DB에 넣지 않는다(4.2절).
+- 앱 첫 실행 시 `isCustom=false`, `createdAt`·`updatedAt`=**시드 작성 시각 고정값**, `deletedAt=null`을 붙여 저장한다. `code`, `nameEn`은 DB에 넣지 않는다(4.2절).
+  - 고정값은 시드 버전마다 하나의 UTC ISO 8601 문자열(예: v1은 `2026-10-01T00:00:00.000Z`)을 시드 파일에 상수로 두고, 그 버전의 모든 기본 운동에 같은 값을 쓴다. 삽입 시각을 쓰지 않는다.
+  - 이유: 기기·설치마다 같은 기본 운동 레코드가 같은 `updatedAt`을 가져야 가져오기 병합의 LWW 비교(데이터 모델 1.1절)가 흔들리지 않는다. [운동 라이브러리 명세](../../2.feature/mvp-spec/exercise-library.md) 3.3절과 같은 규칙이다.
 - 시드 파일 단위 테스트에서 아래를 검사한다.
   - 행 수가 100~150개
+  - 13개 부위마다 2개 이상, 8개 장비마다 1개 이상(운동 라이브러리 명세 3.3절)
+  - 모든 행의 `createdAt`·`updatedAt`이 시드 버전의 고정값과 같음
   - `id`, `code`, `name`(공백·대소문자 무시)에 중복 없음
   - `id`가 UUID v7 형식(소문자)
   - 부위·장비·trackingType이 1.4절 열거값 안에 있음
   - `secondaryMuscles`에 중복이 없고 `primaryMuscle`을 포함하지 않음
   - `primaryMuscle = CARDIO`인 행은 모두 `trackingType = DURATION`
-- 시드 개정(운동 추가·이름 수정)은 새 시드 버전으로 내고, 이미 설치된 앱에는 `id` 기준으로 없는 운동만 추가한다. 기존 기본 운동의 `id`는 바꾸지 않는다(4.1절).
+- 시드 개정(운동 추가·이름 수정)은 새 시드 버전으로 내고, 이미 설치된 앱에는 `id` 기준으로 없는 운동만 추가한다. 기존 기본 운동의 `id`는 바꾸지 않는다(4.1절). 새 시드 버전에서 추가한 운동의 `createdAt`·`updatedAt`은 그 버전의 고정값이다.
 
 ---
 
