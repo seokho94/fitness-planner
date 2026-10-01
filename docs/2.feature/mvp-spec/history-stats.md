@@ -113,7 +113,7 @@ resolveRange(range: StatsRange, today: Date, firstSessionAt?: Date): { start: Da
 - DB 조회는 로컬 경계를 `Date`로 만든 뒤 `toISOString()`으로 바꿔 `workoutSessions.startedAt` 인덱스 범위(`between(startIso, endIso, true, false)`)로 읽는다.
 - 세션은 시작 시각 하나로만 기간에 속한다. 일요일 23:40에 시작해 월요일 00:50에 끝난 세션은 **일요일이 속한 주**에 들어간다.
 - 기기 시간대가 바뀌면(해외 여행 등) 다음 계산부터 새 시간대로 다시 나눈다. 저장 값(`startedAt` UTC)은 바뀌지 않는다.
-- "오늘"·"이번 주"는 화면을 열 때와 앱이 포그라운드로 돌아올 때 다시 계산한다(자정을 넘겨 켜 둔 경우 대비).
+- "오늘"·"이번 주"는 화면을 열 때와 앱이 포그라운드로 돌아올 때 다시 계산한다(자정을 넘겨 켜 둔 경우 대비, [앱 수명주기 6장](../../1.architectur/mvp-design/app-lifecycle.md#6-포그라운드-복귀-처리)).
 
 ### 2.6 계산 예시 (공통 데이터)
 

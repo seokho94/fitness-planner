@@ -371,7 +371,7 @@ sequenceDiagram
 | 현재 스키마 버전과 같음 | 그대로 6단계로 |
 | 현재 스키마 버전보다 작음 | `migrations[v]`를 `v → v+1` 순서로 메모리에서 적용한 뒤 6단계로. 하나라도 실패하면 `MIGRATION_FAILED` |
 
-- 마이그레이션 함수는 Dexie `upgrade()`와 같은 변환을 **JSON 데이터에 대해** 수행하는 순수 함수다(`src/domain/backup/migrations.ts`). Dexie 스키마를 올릴 때마다 같은 버전의 백업 마이그레이션을 함께 추가하고 단위 테스트로 묶는다.
+- 마이그레이션 함수는 Dexie `upgrade()`와 같은 변환을 **JSON 데이터에 대해** 수행하는 순수 함수다(`src/domain/backup/migrations.ts`). Dexie 스키마를 올릴 때마다 같은 버전의 백업 마이그레이션을 함께 추가하고 단위 테스트로 묶는다. 두 변환은 같은 레코드 변환 함수를 공유한다(버전 올림 절차·테스트: [앱 수명주기 5장](../../1.architectur/mvp-design/app-lifecycle.md#5-스키마-마이그레이션)).
 - v1 앱에는 `schemaVersion=1`보다 낮은 버전이 없으므로 마이그레이션 함수는 비어 있다. 구조만 미리 둔다.
 - 하위 버전으로 내보내는 기능(다운그레이드)은 만들지 않는다.
 
@@ -763,6 +763,8 @@ export interface FilePort {
 1. `navigator.storage?.persist`가 없으면 아무것도 하지 않는다(상태: `확인할 수 없음`).
 2. `await navigator.storage.persisted()`가 `true`면 끝.
 3. `fp.persistRequestedAt`이 없으면 `navigator.storage.persist()`를 한 번 호출하고 시각을 기록한다. 결과와 관계없이 앱 사용을 막지 않는다.
+
+- 시작 순서상 5단계이며, 호출만 하고 결과를 기다리지 않은 채 다음 단계로 간다([앱 시작 순서](../../1.architectur/mvp-design/app-lifecycle.md#2-시작-순서)).
 
 - 브라우저에 따라 허용 기준이 다르다(Chromium은 설치된 PWA·사이트 사용 정도로 판단하고 묻지 않으며, Firefox는 사용자에게 묻는다). 브라우저별 동작은 구현 시 다시 확인한다(**확인 필요**).
 

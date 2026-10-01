@@ -199,7 +199,7 @@ BodyMeasurement와 Settings는 다른 엔티티와 관계가 없다.
 
 ### 2.8 Settings (앱 설정)
 
-레코드가 하나뿐인 엔티티다. `id`는 코드에 상수로 둔 고정 UUID(`SETTINGS_ID`)를 쓰고, 앱 첫 실행 시 기본값으로 만든다.
+레코드가 하나뿐인 엔티티다. `id`는 코드에 상수로 둔 고정 UUID(`SETTINGS_ID`)를 쓰고, 앱 첫 실행 시 기본값으로 만든다. 만드는 시점·실패 처리는 [앱 시작 순서](./app-lifecycle.md#2-시작-순서) 2단계(Settings 확보)를 따른다.
 
 | 필드 | 타입 | 필수 | 범위·제약 | 기본값 | 설명 |
 | --- | --- | --- | --- | --- | --- |
@@ -232,7 +232,7 @@ db.version(SCHEMA_VERSION).stores({
 ```
 
 - PK는 모든 테이블에서 `id`(UUID 문자열, 자동 증가 아님)다.
-- Dexie 버전 번호를 `schemaVersion`으로 쓰고, JSON 내보내기 파일에도 같은 값을 넣는다. 스키마가 바뀌면 `db.version(2).stores(...).upgrade(...)`로 올린다.
+- Dexie 버전 번호를 `schemaVersion`으로 쓰고, JSON 내보내기 파일에도 같은 값을 넣는다. 스키마가 바뀌면 `db.version(2).stores(...).upgrade(...)`로 올린다. 버전 올림 절차·업그레이드 함수 규칙·테스트 방법·업그레이드 실패 처리는 [앱 수명주기 5장](./app-lifecycle.md#5-스키마-마이그레이션)을 따른다.
 
 ### 3.2 인덱스 용도
 
@@ -481,7 +481,7 @@ stateDiagram-v2
 - `SessionRepository.start()`는 하나의 `rw` 트랜잭션 안에서 `workoutSessions.where('status').equals('IN_PROGRESS')`를 조회하고, 살아 있는 세션이 있으면 `SessionAlreadyInProgressError`를 던진다.
 - 세션 복원(7.1절 실행 취소)으로 `IN_PROGRESS` 세션을 되살릴 때도 `SessionRepository.restore()`가 같은 검사를 하고 `SessionAlreadyInProgressError`를 던진다.
 - 홈(S-01)은 진행 중 세션이 있으면 "이어하기"와 "세션 취소"를 보여 주고, `운동 시작`·`빈 세션으로 시작` 버튼은 숨기지 않고 **비활성**으로 남겨 사유("진행 중인 운동이 있어요")를 표시한다([T5](../../2.feature/mvp-spec/routine-plan-home.md) 6.3.2절, v1.1, I-30).
-- 앱 시작 시 `getInProgress()`로 진행 중 세션을 찾아 복구한다(F-WS-11). `restTimerEndsAt`이 현재보다 미래면 남은 시간으로 타이머를 다시 띄우고, 지났으면 `null`로 지운다.
+- 앱 시작 시 `getInProgress()`로 진행 중 세션을 찾아 복구한다(F-WS-11). `restTimerEndsAt`이 현재보다 미래면 남은 시간으로 타이머를 다시 띄우고, 지났으면 `null`로 지운다. 시작 순서상 위치(4단계)와 실패 처리는 [앱 시작 순서](./app-lifecycle.md#2-시작-순서)를 따른다.
 - JSON 가져오기(F-IO-02)
   - 덮어쓰기: 파일 내용을 그대로 쓴다. 파일 안에 살아 있는 `IN_PROGRESS` 세션이 2개 이상이면 검증 오류로 거부한다.
   - 병합(F-IO-05): 로컬에 진행 중 세션이 있으면 가져오기를 막고 먼저 종료·취소하도록 안내한다.

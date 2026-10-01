@@ -623,7 +623,7 @@ interface RestTimerNotifier {
 | AN-2 | 알림 id는 고정값 하나(`REST_TIMER_NOTIFICATION_ID`)를 쓴다. 예약은 항상 기존 것을 바꾸므로 휴식 알림은 동시에 1건만 존재한다. |
 | AN-3 | 백그라운드에 있는 동안 종료 예정 시각이 바뀌는 동작은 없지만, 앱 상태와 관계없이 `restTimerEndsAt`이 `null`이 되거나 바뀌는 모든 경로(건너뛰기, 조절, 세션 종료·취소, 다른 세트 완료)는 `cancel()` 또는 `schedule()`을 함께 호출한다. |
 | AN-4 | 앱 프로세스가 종료되어도 예약된 알림은 울려야 한다. 백그라운드 전환 시점에 이미 예약하므로, 최근 앱 목록에서 밀어 종료해도 알림이 남는다. |
-| AN-5 | 알림 채널 `rest-timer`(이름 "휴식 타이머", 중요도 HIGH, 소리·진동 켬)를 앱 시작 시 만든다. |
+| AN-5 | 알림 채널 `rest-timer`(이름 "휴식 타이머", 중요도 HIGH, 소리·진동 켬)를 앱 시작 시 만든다. 시작 순서상 6단계(플랫폼 초기화)이고 첫 화면 렌더를 기다리게 하지 않는다([앱 시작 순서](../../1.architectur/mvp-design/app-lifecycle.md#2-시작-순서)). |
 | AN-6 | 내용: 제목 "휴식이 끝났어요", 본문 "다음 세트: {운동 이름} {세트 번호}세트"(다음 세트가 없으면 "운동을 이어가세요"). 알림을 누르면 앱을 열고 `/workout`으로 이동한다(진행 중 세션이 없으면 IA 규칙대로 홈). |
 | AN-7 | 정시성: 도즈(Doze) 중에도 울리도록 `allowWhileIdle: true`로 예약한다. Android 12 이상에서 정확한 알람(`SCHEDULE_EXACT_ALARM`)이 허용되면 종료 예정 시각 ±1초 이내, 허용되지 않으면 OS가 늦출 수 있다(허용 범위: 앱 안 표시 기준이 맞으면 알림 지연은 결함으로 보지 않음). 정확한 알람 권한 요청 화면으로 사용자를 보내지는 않는다(MVP). **(확인 필요: 플러그인 버전별 정확 알람 처리 방식)** |
 | AN-8 | 권한: Android 13 이상은 `POST_NOTIFICATIONS` 런타임 권한이 필요하다. 처음으로 휴식 타이머가 시작될 때 한 번만 `requestPermission()`을 부른다. 거부되면 다시 묻지 않고, 정보 토스트 "알림이 꺼져 있어 앱 밖에서는 휴식 종료를 알려 드릴 수 없어요"를 한 번 띄운다. 타이머 자체는 앱 안에서 그대로 동작한다. |
@@ -632,7 +632,7 @@ interface RestTimerNotifier {
 **웹(PWA)** — R-6 대응
 
 - 백그라운드 탭에서는 시스템 알림을 보내지 않는다(MVP). `RestTimerNotifier.schedule()`은 아무 일도 하지 않는다(`permissionState()='unsupported'`).
-- 탭이 다시 보이면(`visibilitychange`) 남은 시간을 다시 계산한다. 그사이 종료 예정 시각이 지났으면 소리 없이 `restTimerEndsAt=null`로 정리하고 S-08 헤더에 "휴식 끝"을 3초 보여 준다.
+- 탭이 다시 보이면(`visibilitychange`) 남은 시간을 다시 계산한다. 그사이 종료 예정 시각이 지났으면 소리 없이 `restTimerEndsAt=null`로 정리하고 S-08 헤더에 "휴식 끝"을 3초 보여 준다. 복귀 때 하는 다른 일과의 순서는 [앱 수명주기 6장](../../1.architectur/mvp-design/app-lifecycle.md#6-포그라운드-복귀-처리)을 따른다.
 - 포그라운드 종료 시 소리는 Web Audio로 짧게 낸다. 진동은 `navigator.vibrate`가 있을 때만.
 
 #### 4.4.5 검증
@@ -998,6 +998,8 @@ Scenario: S-10에서 뒤로 가면 홈으로 간다
 | 1 | 진행 중 세션 안내 | `ConfirmDialog(default)`, `confirmLabel='이어하기'` → `/workout`. 새 세션은 만들지 않는다. 기존 세션을 자동으로 종료·삭제하지 않는다 |
 
 #### 4.7.3 복구 처리 (앱 시작·복귀)
+
+앱 시작 때는 시작 순서 4단계(DB 열기·Settings·시드 다음, 첫 화면 렌더 전)에서, 포그라운드 복귀 때는 복귀 처리의 마지막 단계로 실행한다. 순서와 실패 시 앱 차단 여부는 [앱 시작 순서](../../1.architectur/mvp-design/app-lifecycle.md#2-시작-순서)와 [포그라운드 복귀 처리](../../1.architectur/mvp-design/app-lifecycle.md#6-포그라운드-복귀-처리)를 따른다.
 
 ```mermaid
 sequenceDiagram
